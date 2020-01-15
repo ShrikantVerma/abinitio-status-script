@@ -1,0 +1,63 @@
+			 #/bin/sh
+source /root/.bash_profile
+source /etc/profile
+#JUP_JOB_DIR=/home/airun/scripts/2/odd
+#NPIT_JOB_DIR=/absand/absrc/private_sand/airtel/dth/vector/vector_online/run/
+##JUP_JOB_DIR=/home/airun/
+cd /absand/absrc/private_sand/airtel/npit/jupiter_svc/run/
+JUP_JOB_DIR=/absand/absrc/private_sand/airtel/npit/jupiter_svc/run/
+
+#JOBLIST_FILE=$JUP_JOB_DIR/job_file.dat
+#for rec in `cat $JOBLIST_FILE`
+for rec in `cat job_file.dat`
+do
+#sleep 5
+ls -lrt /absand/absrc/private_sand/airtel/npit/jupiter_svc/run/ |  grep $JUP_JOB_DIR/$rec | tail -1
+#ls -lrt /absand/absrc/private_sand/airtel/npit/jupiter_svc/run/ |  grep $JUP_JOB_DIR/$job | tail -1 >> rec_file.dat
+if [ $? -eq 0 ]
+        then
+                echo "$rec" >> rec_file.dat
+#       #else
+#       #       exit
+        fi
+done
+#exit 0
+#cd /home/airun/
+#ls -lrt /absand/absrc/private_sand/airtel/npit/jupiter_svc/run/ | grep .rec | awk '{print $9}' > job_file.dat
+#NPIT_JOB_DIR=/absand/absrc/private_sand/airtel/dth/vector/vector_online/run/
+#0=`running`
+#1=`not running`
+#2=`rec file not found`
+JUP_JOB_LIST=$JUP_JOB_DIR/rec_file.dat
+#NPIT_JOB_LIST=$NPIT_JOB_DIR/rec_file.dat
+HOSTNAME=`hostname -I`
+DATETIME=`date "+%d/%m/%Y %T"`
+#LOGFILE=/tmp/abinitioJobStatus.log
+LOGFILE=/root/abinitioJobStatus.log
+for job in `cat $JUP_JOB_LIST`
+do
+        m_status $JUP_JOB_DIR/$job | grep 'running'
+        if [ $? -eq 0 ]
+        then
+                m_status $JUP_JOB_DIR/$job | grep 'running' | grep 'yes'
+                if [ $? -eq 0 ]
+                then
+                        echo 'Time:'$DATETIME', Application:JUPITER, hostname:'$HOSTNAME', JobName:'$job', Status:0' >> $LOGFILE
+                else
+                        echo 'Time:'$DATETIME', Application:JUPITER, hostname:'$HOSTNAME', JobName:'$job', Status:1' >> $LOGFILE
+                fi
+        else
+                echo 'Time:'$DATETIME', Application:JUPITER, hostname:'$HOSTNAME', JobName:'$job', Status:2' >> $LOGFILE
+        fi
+done
+#for job in `cat $NPIT_JOB_LIST`
+#do
+#        m_status $NPIT_JOB_DIR/$job | grep 'running' | grep "yes"
+#        if [ $? -eq 0 ]
+#        then
+#                echo 'Time:'$DATETIME', Application:NPIT, hostname:'$HOSTNAME', JobName:'$job', Status:0' >> $LOGFILE
+#        else
+#                echo 'Time:'$DATETIME', Application:NPIT, hostname:'$HOSTNAME', JobName:'$job', Status:1' >> $LOGFILE
+#        fi
+#done
+exit 0
